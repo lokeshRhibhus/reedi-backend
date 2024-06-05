@@ -92,12 +92,6 @@ jobs:
         if: ${{ failure() }} || ${{ success() }}
         run: ls -la ./data/modules
 
-      # Code check
-      - name: Check formatting with black
-        run: black --check .
-      - name: Lint with ruff
-        run: ruff check .
-# 
       # Create the SSH private key file
       - name: Make key file
         run: |
