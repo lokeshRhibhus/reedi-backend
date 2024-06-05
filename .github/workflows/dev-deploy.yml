@@ -9,6 +9,9 @@ jobs:
       AZURE_WEBAPP_NAME: dev-reedi
       AZURE_WEBAPP_PACKAGE_PATH: '.'
       PYTHON_VERSION: '3.10'
+      STORAGE_FILE_NAME: ojd_daps_skills_data.zip
+      CONTAINER_NAME: packages
+      PATH_TO_PACKAGE_FILE: /venv/lib/python3.10/site-packages/
     steps:
       # Clone repository
       - name: Checkout code
@@ -112,14 +115,62 @@ jobs:
       - name: Add server to known hosts
         run: |
           ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
+      # ZIP files
+      - name: Set up Azure CLI
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az --version
+
+      - name: Make temp dir
+        run: |
+          mkdir -p $HOME/.azure-config
+          export AZURE_CONFIG_DIR=$HOME/.azure-config
+          echo "AZURE_CONFIG_DIR=$HOME/.azure-config" >> $GITHUB_ENV
+
+      - name: Login to Azure
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Download Blob from Azure Storage
+        run: |
+          az storage blob download \
+            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --container-name ${{env.CONTAINER_NAME}} \
+            --name ${{env.STORAGE_FILE_NAME}} \
+            --file $(pwd)/${{env.STORAGE_FILE_NAME}} \
+            --auth-mode key \
+            --account-key ${{ secrets.AZURE_STORAGE_KEY }}
+
+      - name: Verify Download
+        run: ls -l $(pwd)
+
+      - name: install unzip
+        run: |
+          sudo apt install unzip -y
+
+      - name: Move file and unzip
+        run: |
+          if [! -f "$(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}"]; then
+            mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}
+          else
+            echo "File already exists, skipping move step."
+          fi
+          unzip $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
+
+      
       # send files
       - name: SCP to files
-        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no $(pwd)/requirements.txt abodoo@20.193.149.51:/home/abodoo/api/
+        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no -r . abodoo@20.193.149.51:/home/abodoo/api/
       # Establish connection and create directory
       - name: Establish connection
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-          mkdir -p api2
+          echo pulled
           EOF
 
      
