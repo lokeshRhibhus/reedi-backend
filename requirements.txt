@@ -1,0 +1,10 @@
+pytest==8.0.2
+requests==2.31.0
+requests-mock==1.11.0
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1-py3-none-any.whl#sha256=83872781dc64893d45d9dbe940e05f80df7e7196e169ea29e2e9742fed079549
+ruff==0.3.3
+black==24.3.0
+gunicorn>=20.0.4
+dvc[gdrive]
+dvc_gs==3.0.1
+ojd_daps_skills @ git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89

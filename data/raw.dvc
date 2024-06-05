@@ -1,0 +1,46 @@
+outs:
+- hash: md5
+  path: raw
+  files:
+  - relpath: jobs/2022-01-01_2022-12-31/job_data.json
+    md5: 34d1bbd838b6e932d2ed670374ece4b2
+    size: 17704665
+    cloud:
+      myremote:
+        etag: 088096a3f8b9a185031001
+        version_id: '1711989517241088'
+  - relpath: jobs/2023-01-01_2023-12-31/job_data.json
+    md5: 69ef87732cc2d277f7651c8a93965e42
+    size: 32818151
+    cloud:
+      myremote:
+        etag: 08aaf3aff8b9a185031001
+        version_id: '1711989517449642'
+  - relpath: jobs/2024-01-01_2024-01-31/job_data.json
+    md5: accd3514394f3ff67da84a4a4d17bb78
+    size: 2341309
+    cloud:
+      myremote:
+        etag: 08b1bffcf7b9a185031001
+        version_id: '1711989516607409'
+  - relpath: jobs/2024-02-01_2024-02-29/job_data.json
+    md5: 0bc15c7469e6b3e4abcb218dc8bf89be
+    size: 614012
+    cloud:
+      myremote:
+        etag: 0884f0c6f7b9a185031001
+        version_id: '1711989515728900'
+  - relpath: jobs/2024-03-01_2024-03-31/job_data.json
+    md5: 5b9fede73920205f544c15b49b3a486b
+    size: 583379
+    cloud:
+      myremote:
+        etag: 08d5d8b0f182ab85031001
+        version_id: '1712318336216149'
+  - relpath: jobs/2024-04-01_2024-04-30/job_data.json
+    md5: 3b0c7aec2c7800709a7883f8dfc2f7c2
+    size: 2
+    cloud:
+      myremote:
+        etag: 08cad4a6d2b08286031001
+        version_id: '1715319916309066'

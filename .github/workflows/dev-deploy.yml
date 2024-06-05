@@ -1,0 +1,67 @@
+name: Deployment
+
+on: [push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # Setup python and dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Write credentials.json file
+        run: |
+          touch credentials.json
+          echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
+          cat credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
+        #
+        env:
+          CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+          pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
+      - name: Set up DVC remote
+        run: dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
+      - name: Read PWD
+        run: pwd
+      - name: Create modules directory
+        run: mkdir $(pwd)/data/modules
+      - name: Check config file
+        run: cat $(pwd)/.dvc/config
+      # Debugging steps
+      - name: Print DVC version
+        run: dvc version
+      - name: List DVC remotes
+        run: dvc remote list
+      - name: List DVC tracked files
+        run: dvc list . --dvc-only
+      # Pull data
+      - name: Pull data
+        run: dvc pull
+        continue-on-error: true
+      - name: Check modules directory
+        run: ls $(pwd)/data/ && echo "modules :" && ls $(pwd)/data/modules
+      - name: Read data
+        if: ${{ failure() }} || ${{ success() }}
+        run: ls -la ./data/modules
+      # Code check
+      - name: Check formatting with black
+        run: black --check .
+      - name: Lint with ruff
+        run: ruff check .
+      # Push to Cloud [Azure]
+      - name: Push to cloud
+        run: 'echo OK!!!'

@@ -1,0 +1,6 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = gs://reedi-storage/dvcstore
+    version_aware = true
+    credentialpath = ../credentials.json

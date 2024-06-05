@@ -1,0 +1,18 @@
+outs:
+- hash: md5
+  path: processed
+  files:
+  - relpath: jobs_clean/NEW_IR_Companies_Clean.csv
+    md5: 47debc75c8c29e60a5c885abea5ce930
+    size: 11206919
+    cloud:
+      myremote:
+        etag: 088cd0fff082ab85031001
+        version_id: '1712318335412236'
+  - relpath: jobs_extracted/NEW_IR_Companies_Extracted.csv
+    md5: 04b28d0c152a5a1d479c8fff4a1cf657
+    size: 398060541
+    cloud:
+      myremote:
+        etag: 0883a9f197a88d86031001
+        version_id: '1715695603438723'

@@ -1,0 +1,5 @@
+{
+    "compagny_lists_enpoint": "https://api.theirstack.com/v0/company_lists",
+    "compagny_endpoint":  "https://api.theirstack.com/v0/company_lists/{}/companies",
+    "job_endpoint": "https://api.theirstack.com/v1/jobs/search"
+}
