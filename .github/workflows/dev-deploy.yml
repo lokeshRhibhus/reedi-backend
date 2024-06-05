@@ -52,6 +52,11 @@ jobs:
       - name: Pull data
         run: dvc pull
         continue-on-error: true
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'dev-reedi-backend'
+          publish-profile: ${{ secrets.AzureWebAppPublishProfile }}
       - name: Check modules directory
         run: ls $(pwd)/data/ && echo "modules :" && ls $(pwd)/data/modules
       - name: Read data
