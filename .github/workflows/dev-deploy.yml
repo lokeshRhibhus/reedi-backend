@@ -19,7 +19,7 @@ jobs:
         run: ls
       - name: establish connection
         run: | 
-          ssh -i vapi-vm2-reedi-backend abodoo@20.193.149.51 <<
+          ssh -i vapi-vm2-reedi-backend abodoo@20.193.149.51 << 'EOF'
           mkdir api2
           EOF
      
