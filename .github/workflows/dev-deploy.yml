@@ -10,7 +10,90 @@ jobs:
       # Clone repository
       - name: Checkout code
         uses: actions/checkout@v2
+      # Setup python and dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{env.PYTHON_VERSION}}
 
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Set up dependency caching for faster installs
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pre-commit
+
+      - name: Write credentials.json file
+        run: |
+          touch credentials.json
+          echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
+          cat credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
+        #
+        env:
+          CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+          pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
+
+      - name: Set up DVC remote
+        run: dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
+
+      - name: Read PWD
+        run: pwd
+
+      - name: Create modules directory
+        run: mkdir $(pwd)/data/modules
+
+      - name: Check config file
+        run: cat $(pwd)/.dvc/config
+      # Pull data
+      - name: Verify DVC remote
+        run: |
+          dvc remote list
+          # dvc remote status
+
+      - name: List DVC remote storage files
+        run: |
+          dvc remote list
+          # dvc ls myremote -R
+      - name: Ensure DVC cache directory exists
+        run: |
+          mkdir -p $(pwd)/.dvc/cache/files/md5/
+          mkdir -p $(pwd)/data/processed/jobs_clean/
+
+      - name: Pull data
+        run: dvc pull -v
+        continue-on-error: true
+
+      - name: Check modules directory
+        run: ls $(pwd)/data/ && echo "modules :" && ls $(pwd)/data/modules
+
+      - name: Read data
+        if: ${{ failure() }} || ${{ success() }}
+        run: ls -la ./data/modules
+
+      # Code check
+      - name: Check formatting with black
+        run: black --check .
+      - name: Lint with ruff
+        run: ruff check .
+# 
       # Create the SSH private key file
       - name: Make key file
         run: |
@@ -31,7 +114,9 @@ jobs:
       - name: Add server to known hosts
         run: |
           ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
-
+      # send files
+      - name: SCP to files
+        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no $(pwd)/requirement.txt abodoo@20.193.149.51:/home/abodoo/api/
       # Establish connection and create directory
       - name: Establish connection
         run: |
