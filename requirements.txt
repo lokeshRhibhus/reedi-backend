@@ -7,4 +7,3 @@ black==24.3.0
 gunicorn>=20.0.4
 dvc[gdrive]
 dvc_gs==3.0.1
-ojd_daps_skills @ git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
