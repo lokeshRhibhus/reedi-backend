@@ -17,7 +17,12 @@ jobs:
           touch vapi-vm2-reedi-backend
           chmod 600 vapi-vm2-reedi-backend
           echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
-
+          
+      # Create the .ssh directory
+      - name: Create .ssh directory
+        run: |
+          mkdir -p ~/.ssh
+          
       # List files for debugging
       - name: List files
         run: ls -la
