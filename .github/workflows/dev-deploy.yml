@@ -10,16 +10,28 @@ jobs:
       # Clone repository
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: make key file
+
+      # Create the SSH private key file
+      - name: Make key file
         run: |
           touch vapi-vm2-reedi-backend
-          echo '${{secrets.VM_KEY}}' > vapi-vm2-reedi-backend
-          cat vapi-vm2-reedi-backend
-      - name: list files
-        run: ls
-      - name: establish connection
-        run: | 
-          ssh -i vapi-vm2-reedi-backend abodoo@20.193.149.51 << 'EOF'
-          mkdir api2
+          chmod 600 vapi-vm2-reedi-backend
+          echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
+
+      # List files for debugging
+      - name: List files
+        run: ls -la
+
+      # Add the server to known hosts
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
+
+      # Establish connection and create directory
+      - name: Establish connection
+        run: |
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+          mkdir -p api2
           EOF
+
      
