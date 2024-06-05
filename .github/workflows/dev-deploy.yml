@@ -10,7 +10,13 @@ jobs:
       # Clone repository
       - name: Checkout code
         uses: actions/checkout@v2
-      # Setup python and dependencies
+      - name: make key file
+        run: |
+          touch vapi-vm2-reedi-backend
+          echo '${{secrets.VM_KEY}}' > vapi-vm2-reedi-backend
+          cat vapi-vm2-reedi-backend
+      - name: list files
+        run: ls
       - name: establish connection
         run: | 
           ssh -i vapi-vm2-reedi-backend abodoo@20.193.149.51 <<
