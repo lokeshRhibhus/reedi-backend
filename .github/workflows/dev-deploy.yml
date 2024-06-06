@@ -27,6 +27,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
+          python -m pip install --upgrade pip
 
       - name: Set up dependency caching for faster installs
         uses: actions/cache@v3
@@ -38,12 +39,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          source venv/bin/activate
           pip install -r requirements.txt
           pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
           pip uninstall fsspec --yes
           pip install fsspec>=2024.2.0
-          pip install pre-commit
+          pip install pre-commit tqdm
 
       - name: Write credentials.json file
         run: |
