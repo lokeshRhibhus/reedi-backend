@@ -63,7 +63,9 @@ jobs:
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
 
       - name: Set up DVC remote
-        run: dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
+        run: 
+          source venv/bin/activate
+          dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
 
       - name: Read PWD
         run: pwd
