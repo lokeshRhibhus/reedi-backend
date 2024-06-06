@@ -41,7 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
-          pip uninstall fsspec
+          pip uninstall fsspec --force
           pip install fsspec>=2024.2.0
           pip install pre-commit
 
