@@ -165,7 +165,7 @@ jobs:
       
       # send files
       - name: SCP to files
-        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no -r . abodoo@20.193.149.51:/home/abodoo/api/
+        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no -r ./* abodoo@20.193.149.51:/home/abodoo/api/
       # Establish connection and create directory
       - name: Establish connection
         run: |
