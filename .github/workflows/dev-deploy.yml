@@ -16,12 +16,12 @@ jobs:
       # Clone repository
       - name: Checkout code
         uses: actions/checkout@v2
+
       # Setup python and dependencies
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{env.PYTHON_VERSION}}
-
 
       - name: Create and start virtual environment
         run: |
@@ -52,7 +52,6 @@ jobs:
           echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
           cat credentials.json
           export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
-        #
         env:
           CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
           pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
@@ -63,7 +62,7 @@ jobs:
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
 
       - name: Set up DVC remote
-        run: 
+        run: |
           source venv/bin/activate
           dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
 
@@ -71,27 +70,31 @@ jobs:
         run: pwd
 
       - name: Create modules directory
-        run: mkdir $(pwd)/data/modules
+        run: mkdir -p $(pwd)/data/modules
 
       - name: Check config file
         run: cat $(pwd)/.dvc/config
+
       # Pull data
       - name: Verify DVC remote
         run: |
+          source venv/bin/activate
           dvc remote list
-          # dvc remote status
 
       - name: List DVC remote storage files
         run: |
+          source venv/bin/activate
           dvc remote list
-          # dvc ls myremote -R
+
       - name: Ensure DVC cache directory exists
         run: |
           mkdir -p $(pwd)/.dvc/cache/files/md5/
           mkdir -p $(pwd)/data/processed/jobs_clean/
 
       - name: Pull data
-        run: dvc pull -v
+        run: |
+          source venv/bin/activate
+          dvc pull -v
         continue-on-error: true
 
       - name: Check modules directory
@@ -107,12 +110,11 @@ jobs:
           touch vapi-vm2-reedi-backend
           chmod 600 vapi-vm2-reedi-backend
           echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
-          
+
       # Create the .ssh directory
       - name: Create .ssh directory
-        run: |
-          mkdir -p ~/.ssh
-          
+        run: mkdir -p ~/.ssh
+
       # List files for debugging
       - name: List files
         run: ls -la
@@ -121,7 +123,8 @@ jobs:
       - name: Add server to known hosts
         run: |
           ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
-      # ZIP files
+
+      # Set up Azure CLI
       - name: Set up Azure CLI
         uses: azure/cli@v2
         with:
@@ -156,27 +159,24 @@ jobs:
         run: ls -l $(pwd)
 
       - name: install unzip
-        run: |
-          sudo apt install unzip -y
+        run: sudo apt install unzip -y
 
       - name: Move file and unzip
         run: |
-          if [! -f "$(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}"]; then
+          if [ ! -f "$(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}" ]; then
             mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}
           else
             echo "File already exists, skipping move step."
           fi
           unzip $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
 
-      
-      # send files
+      # Send files
       - name: SCP to files
         run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no -r ./* abodoo@20.193.149.51:/home/abodoo/api/
+
       # Establish connection and create directory
       - name: Establish connection
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
           echo pulled
           EOF
-
-     
