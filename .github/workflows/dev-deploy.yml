@@ -193,11 +193,17 @@ jobs:
       - name: Install dependencies on remote server
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          sudo apt-get update
+          sudo apt-get install -y python3-venv
           cd /home/abodoo/api
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
+          pip uninstall fsspec --yes
+          pip install fsspec>=2024.2.0
+          pip install pre-commit tqdm dvc
           EOF
 
       # Establish connection and create directory
