@@ -170,10 +170,19 @@ jobs:
           fi
           unzip $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
 
-      # Send files
-      - name: SCP to files
-        run: scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no -r ./* abodoo@20.193.149.51:/home/abodoo/api/
+      - name: Compress files
+        run: |
+          zip -r deployment_files.zip ./*
 
+      # Send files via SCP
+      - name: SCP files
+        run: |
+          scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no deployment_files.zip abodoo@20.193.149.51:/home/abodoo/api/
+
+      # Decompress files on remote server
+      - name: Decompress files on remote server
+        run: |
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip deployment_files.zip'
       # Establish connection and create directory
       - name: Establish connection
         run: |
