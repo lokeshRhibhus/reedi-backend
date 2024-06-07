@@ -196,7 +196,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-venv
           cd /home/abodoo/api
-          python3 -m venv venv
+          python3.10 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
