@@ -203,7 +203,7 @@ jobs:
       # Decompress files on remote server
       - name: Decompress files on remote server
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip deployment_files.zip'
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip -o deployment_files.zip'
 
       # Install pyenv and Python 3.10 on the remote server
       - name: Install pyenv and Python 3.10 on remote server
