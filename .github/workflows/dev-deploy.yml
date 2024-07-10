@@ -188,10 +188,13 @@ jobs:
           zip -r deployment_files.zip ./*
 
       # Install unzip on remote server
+      # Install unzip on remote server
       - name: Install unzip on remote server
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'sudo apt-get update && sudo apt-get install unzip -y'
-
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          sudo apt-get update
+          sudo apt-get install --reinstall python3-apt -y
+          sudo apt-get install unzip -y
       # Send files via SCP
       - name: SCP files
         run: |
