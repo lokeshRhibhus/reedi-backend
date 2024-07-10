@@ -57,20 +57,20 @@ jobs:
       #     source venv/bin/activate
       #     black --check .
 
-      # - name: Write credentials.json file
-      #   run: |
-      #     touch credentials.json
-      #     echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
-      #     cat credentials.json
-      #     export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
-      #   env:
-      #     CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
-      #     pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
-      #     LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
-      #     GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      - name: Write credentials.json file
+        run: |
+          touch credentials.json
+          echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
+          cat credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
+        env:
+          CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+          pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-      # - name: Set GOOGLE_APPLICATION_CREDENTIALS
-      #   run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
 
       # - name: Set up DVC remote
       #   run: |
@@ -120,35 +120,35 @@ jobs:
       #     chmod 600 vapi-vm2-reedi-backend
       #     echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
 
-      # - name: Create .ssh directory
-      #   run: mkdir -p ~/.ssh
+      - name: Create .ssh directory
+        run: mkdir -p ~/.ssh
 
-      # - name: List files
-      #   run: ls -la
+      - name: List files
+        run: ls -la
 
-      # - name: Add server to known hosts
-      #   run: |
-      #     ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
 
-      # - name: Set up Azure CLI
-      #   uses: azure/cli@v2
-      #   with:
-      #     azcliversion: latest
-      #     inlineScript: |
-      #       az --version
+      - name: Set up Azure CLI
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az --version
 
-      # - name: Make temp dir
-      #   run: |
-      #     mkdir -p $HOME/.azure-config
-      #     export AZURE_CONFIG_DIR=$HOME/.azure-config
-      #     echo "AZURE_CONFIG_DIR=$HOME/.azure-config" >> $GITHUB_ENV
+      - name: Make temp dir
+        run: |
+          mkdir -p $HOME/.azure-config
+          export AZURE_CONFIG_DIR=$HOME/.azure-config
+          echo "AZURE_CONFIG_DIR=$HOME/.azure-config" >> $GITHUB_ENV
 
-      # - name: Login to Azure
-      #   run: |
-      #     az login --service-principal \
-      #       --username ${{ secrets.AZURE_CLIENT_ID }} \
-      #       --password ${{ secrets.AZURE_CLIENT_SECRET }} \
-      #       --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Login to Azure
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
 
       # - name: Download Blob from Azure Storage
       #   run: |
