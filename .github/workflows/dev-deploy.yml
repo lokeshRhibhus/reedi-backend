@@ -167,12 +167,12 @@ jobs:
 
       - name: Move file and unzip
         run: |
-          if [ ! -f "$(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}" ]; then
-            mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}
+          if [ ! -f "$(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}" ]; then
+            mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}
           else
             echo "File already exists, skipping move step."
           fi
-          unzip $(pwd)/${{env.PATH_TO_MOVE_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
+          unzip $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
 
       - name: Compress files
         run: |
@@ -206,19 +206,23 @@ jobs:
             fi
             export PYENV_ROOT="$HOME/.pyenv"
             export PATH="$PYENV_ROOT/bin:$PATH"
-            eval "$(pyenv init --path)"
-            eval "$(pyenv init -)"
-            eval "$(pyenv virtualenv-init -)"
+            echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+            echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+            echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+            echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+            echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
+            source ~/.bashrc
             if ! pyenv versions | grep 3.10.0; then
               pyenv install 3.10.0
             fi
             pyenv global 3.10.0
             pyenv --version
             python --version
+          
 
       - name: Install dependencies and run the script
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             export PATH="$HOME/.pyenv/bin:$PATH"
             eval "$(pyenv init --path)"
             eval "$(pyenv init -)"
@@ -231,5 +235,6 @@ jobs:
             pip install fsspec>=2024.2.0
             pip install black
             black .
-            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output --start_date 2024-06-01 --end_date 2024-07-01
+            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
           EOF
+
