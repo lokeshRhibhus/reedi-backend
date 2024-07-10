@@ -114,11 +114,11 @@ jobs:
       #   if: ${{ failure() }} || ${{ success() }}
       #   run: ls -la ./data/modules
 
-      # - name: Make key file
-      #   run: |
-      #     touch vapi-vm2-reedi-backend
-      #     chmod 600 vapi-vm2-reedi-backend
-      #     echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
+      - name: Make key file
+        run: |
+          touch vapi-vm2-reedi-backend
+          chmod 600 vapi-vm2-reedi-backend
+          echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
 
       - name: Create .ssh directory
         run: mkdir -p ~/.ssh
@@ -150,15 +150,15 @@ jobs:
             --password ${{ secrets.AZURE_CLIENT_SECRET }} \
             --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      # - name: Download Blob from Azure Storage
-      #   run: |
-      #     az storage blob download \
-      #       --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
-      #       --container-name ${{env.CONTAINER_NAME}} \
-      #       --name ${{env.STORAGE_FILE_NAME}} \
-      #       --file $(pwd)/${{env.STORAGE_FILE_NAME}} \
-      #       --auth-mode key \
-      #       --account-key ${{ secrets.AZURE_STORAGE_KEY }}
+      - name: Download Blob from Azure Storage
+        run: |
+          az storage blob download \
+            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --container-name ${{env.CONTAINER_NAME}} \
+            --name ${{env.STORAGE_FILE_NAME}} \
+            --file $(pwd)/${{env.STORAGE_FILE_NAME}} \
+            --auth-mode key \
+            --account-key ${{ secrets.AZURE_STORAGE_KEY }}
 
       # - name: Verify Download
       #   run: ls -l $(pwd)
