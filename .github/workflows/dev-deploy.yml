@@ -12,12 +12,11 @@ jobs:
       STORAGE_FILE_NAME: ojd_daps_skills_data.zip
       CONTAINER_NAME: packages
       PATH_TO_PACKAGE_FILE: /venv/lib/python3.10/site-packages/
+
     steps:
-      # Clone repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Setup python and dependencies
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -45,15 +44,13 @@ jobs:
           pip uninstall fsspec --yes
           pip install fsspec>=2024.2.0
           pip install pre-commit tqdm dvc
-          pip install black  # Ensure black is installed
+          pip install black
 
-      # Reformat code with black
       - name: Reformat code with black
         run: |
           source venv/bin/activate
           black .
 
-      # Check that the code is properly formatted
       - name: Check code formatting with black
         run: |
           source venv/bin/activate
@@ -88,7 +85,6 @@ jobs:
       - name: Check config file
         run: cat $(pwd)/.dvc/config
 
-      # Pull data
       - name: Verify DVC remote
         run: |
           source venv/bin/activate
@@ -117,27 +113,22 @@ jobs:
         if: ${{ failure() }} || ${{ success() }}
         run: ls -la ./data/modules
 
-      # Create the SSH private key file
       - name: Make key file
         run: |
           touch vapi-vm2-reedi-backend
           chmod 600 vapi-vm2-reedi-backend
           echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
 
-      # Create the .ssh directory
       - name: Create .ssh directory
         run: mkdir -p ~/.ssh
 
-      # List files for debugging
       - name: List files
         run: ls -la
 
-      # Add the server to known hosts
       - name: Add server to known hosts
         run: |
           ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
 
-      # Set up Azure CLI
       - name: Set up Azure CLI
         uses: azure/cli@v2
         with:
@@ -171,7 +162,7 @@ jobs:
       - name: Verify Download
         run: ls -l $(pwd)
 
-      - name: install unzip
+      - name: Install unzip
         run: sudo apt install unzip -y
 
       - name: Move file and unzip
@@ -187,53 +178,57 @@ jobs:
         run: |
           zip -r deployment_files.zip ./*
 
-      # Install unzip on remote server
-      # Install unzip on remote server
       - name: Install unzip on remote server
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
-          sudo apt-get update
-          sudo apt-get install --reinstall python3-apt -y
-          sudo apt-get install unzip -y
-      # Send files via SCP
+            sudo apt-get update
+            sudo apt-get install --reinstall python3-apt -y
+            sudo apt-get install unzip -y
+          EOF
+
       - name: SCP files
         run: |
           scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no deployment_files.zip abodoo@20.193.149.51:/home/abodoo/api/
 
-      # Decompress files on remote server
       - name: Decompress files on remote server
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip -o deployment_files.zip'
 
-      # Install pyenv and Python 3.10 on the remote server
       - name: Install pyenv and Python 3.10 on remote server
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
-          curl https://pyenv.run | bash
-          export PATH="$HOME/.pyenv/bin:$PATH"
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
-          eval "$(pyenv virtualenv-init -)"
-          pyenv install 3.10.0
-          pyenv global 3.10.0
-          EOF
+            sudo apt update
+            sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
+            libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+            xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
+            if [ ! -d "$HOME/.pyenv" ]; then
+              git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+            fi
+            export PYENV_ROOT="$HOME/.pyenv"
+            export PATH="$PYENV_ROOT/bin:$PATH"
+            eval "$(pyenv init -)"
+            eval "$(pyenv virtualenv-init -)"
+            if ! pyenv versions | grep 3.10.0; then
+              pyenv install 3.10.0
+            fi
+            pyenv global 3.10.0
+            pyenv --version
+            python --version
 
-      # Install dependencies and run the script
       - name: Install dependencies and run the script
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
-          export PATH="$HOME/.pyenv/bin:$PATH"
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
-          eval "$(pyenv virtualenv-init -)"
-          cd /home/abodoo/api
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
-          pip uninstall fsspec --yes
-          pip install fsspec>=2024.2.0
-          pip install black
-          black .
-          python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
+            export PATH="$HOME/.pyenv/bin:$PATH"
+            eval "$(pyenv init --path)"
+            eval "$(pyenv init -)"
+            eval "$(pyenv virtualenv-init -)"
+            cd /home/abodoo/api
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
+            pip uninstall fsspec --yes
+            pip install fsspec>=2024.2.0
+            pip install black
+            black .
+            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
           EOF
-
