@@ -45,6 +45,19 @@ jobs:
           pip uninstall fsspec --yes
           pip install fsspec>=2024.2.0
           pip install pre-commit tqdm dvc
+          pip install black  # Ensure black is installed
+
+      # Reformat code with black
+      - name: Reformat code with black
+        run: |
+          source venv/bin/activate
+          black .
+
+      # Check that the code is properly formatted
+      - name: Check code formatting with black
+        run: |
+          source venv/bin/activate
+          black --check .
 
       - name: Write credentials.json file
         run: |
@@ -108,7 +121,7 @@ jobs:
       - name: Make key file
         run: |
           touch vapi-vm2-reedi-backend
-          chmod 600 vapi-v2-reedi-backend
+          chmod 600 vapi-vm2-reedi-backend
           echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
 
       # Create the .ssh directory
@@ -218,4 +231,6 @@ jobs:
           pip install fsspec>=2024.2.0
           pip install black
           black .
+          python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
           EOF
+
