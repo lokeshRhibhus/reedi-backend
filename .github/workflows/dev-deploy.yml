@@ -17,207 +17,207 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{env.PYTHON_VERSION}}
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{env.PYTHON_VERSION}}
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          python -m pip install --upgrade pip
+      # - name: Create and start virtual environment
+      #   run: |
+      #     python -m venv venv
+      #     source venv/bin/activate
+      #     python -m pip install --upgrade pip
 
-      - name: Set up dependency caching for faster installs
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # - name: Set up dependency caching for faster installs
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.cache/pip
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
 
-      - name: Install dependencies
-        run: |
-          source venv/bin/activate
-          pip install -r requirements.txt
-          pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
-          pip uninstall fsspec --yes
-          pip install fsspec>=2024.2.0
-          pip install pre-commit tqdm dvc
-          pip install black
-          pip install html5lib
+      # - name: Install dependencies
+      #   run: |
+      #     source venv/bin/activate
+      #     pip install -r requirements.txt
+      #     pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
+      #     pip uninstall fsspec --yes
+      #     pip install fsspec>=2024.2.0
+      #     pip install pre-commit tqdm dvc
+      #     pip install black
+      #     pip install html5lib
 
-      - name: Reformat code with black
-        run: |
-          source venv/bin/activate
-          black .
+      # - name: Reformat code with black
+      #   run: |
+      #     source venv/bin/activate
+      #     black .
 
-      - name: Check code formatting with black
-        run: |
-          source venv/bin/activate
-          black --check .
+      # - name: Check code formatting with black
+      #   run: |
+      #     source venv/bin/activate
+      #     black --check .
 
-      - name: Write credentials.json file
-        run: |
-          touch credentials.json
-          echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
-          cat credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
-        env:
-          CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
-          pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
-          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      # - name: Write credentials.json file
+      #   run: |
+      #     touch credentials.json
+      #     echo '${{secrets.BUCKET_CREDENTIALS}}' > credentials.json
+      #     cat credentials.json
+      #     export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/credentials.json"
+      #   env:
+      #     CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+      #     pythonLocation: /opt/hostedtoolcache/Python/3.10.14/x64
+      #     LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
+      #     GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-      - name: Set GOOGLE_APPLICATION_CREDENTIALS
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
+      # - name: Set GOOGLE_APPLICATION_CREDENTIALS
+      #   run: echo "GOOGLE_APPLICATION_CREDENTIALS=$GITHUB_WORKSPACE/credentials.json" >> $GITHUB_ENV
 
-      - name: Set up DVC remote
-        run: |
-          source venv/bin/activate
-          dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
+      # - name: Set up DVC remote
+      #   run: |
+      #     source venv/bin/activate
+      #     dvc remote modify myremote credentialpath $GITHUB_WORKSPACE/credentials.json
 
-      - name: Read PWD
-        run: pwd
+      # - name: Read PWD
+      #   run: pwd
 
-      - name: Create modules directory
-        run: mkdir -p $(pwd)/data/modules
+      # - name: Create modules directory
+      #   run: mkdir -p $(pwd)/data/modules
 
-      - name: Check config file
-        run: cat $(pwd)/.dvc/config
+      # - name: Check config file
+      #   run: cat $(pwd)/.dvc/config
 
-      - name: Verify DVC remote
-        run: |
-          source venv/bin/activate
-          dvc remote list
+      # - name: Verify DVC remote
+      #   run: |
+      #     source venv/bin/activate
+      #     dvc remote list
 
-      - name: List DVC remote storage files
-        run: |
-          source venv/bin/activate
-          dvc remote list
+      # - name: List DVC remote storage files
+      #   run: |
+      #     source venv/bin/activate
+      #     dvc remote list
 
-      - name: Ensure DVC cache directory exists
-        run: |
-          mkdir -p $(pwd)/.dvc/cache/files/md5/
-          mkdir -p $(pwd)/data/processed/jobs_clean/
+      # - name: Ensure DVC cache directory exists
+      #   run: |
+      #     mkdir -p $(pwd)/.dvc/cache/files/md5/
+      #     mkdir -p $(pwd)/data/processed/jobs_clean/
 
-      - name: Pull data
-        run: |
-          source venv/bin/activate
-          dvc pull -v
-        continue-on-error: true
+      # - name: Pull data
+      #   run: |
+      #     source venv/bin/activate
+      #     dvc pull -v
+      #   continue-on-error: true
 
-      - name: Check modules directory
-        run: ls $(pwd)/data/ && echo "modules :" && ls $(pwd)/data/modules
+      # - name: Check modules directory
+      #   run: ls $(pwd)/data/ && echo "modules :" && ls $(pwd)/data/modules
 
-      - name: Read data
-        if: ${{ failure() }} || ${{ success() }}
-        run: ls -la ./data/modules
+      # - name: Read data
+      #   if: ${{ failure() }} || ${{ success() }}
+      #   run: ls -la ./data/modules
 
-      - name: Make key file
-        run: |
-          touch vapi-vm2-reedi-backend
-          chmod 600 vapi-vm2-reedi-backend
-          echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
+      # - name: Make key file
+      #   run: |
+      #     touch vapi-vm2-reedi-backend
+      #     chmod 600 vapi-vm2-reedi-backend
+      #     echo "${{ secrets.VM_KEY }}" > vapi-vm2-reedi-backend
 
-      - name: Create .ssh directory
-        run: mkdir -p ~/.ssh
+      # - name: Create .ssh directory
+      #   run: mkdir -p ~/.ssh
 
-      - name: List files
-        run: ls -la
+      # - name: List files
+      #   run: ls -la
 
-      - name: Add server to known hosts
-        run: |
-          ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
+      # - name: Add server to known hosts
+      #   run: |
+      #     ssh-keyscan -H 20.193.149.51 >> ~/.ssh/known_hosts
 
-      - name: Set up Azure CLI
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az --version
+      # - name: Set up Azure CLI
+      #   uses: azure/cli@v2
+      #   with:
+      #     azcliversion: latest
+      #     inlineScript: |
+      #       az --version
 
-      - name: Make temp dir
-        run: |
-          mkdir -p $HOME/.azure-config
-          export AZURE_CONFIG_DIR=$HOME/.azure-config
-          echo "AZURE_CONFIG_DIR=$HOME/.azure-config" >> $GITHUB_ENV
+      # - name: Make temp dir
+      #   run: |
+      #     mkdir -p $HOME/.azure-config
+      #     export AZURE_CONFIG_DIR=$HOME/.azure-config
+      #     echo "AZURE_CONFIG_DIR=$HOME/.azure-config" >> $GITHUB_ENV
 
-      - name: Login to Azure
-        run: |
-          az login --service-principal \
-            --username ${{ secrets.AZURE_CLIENT_ID }} \
-            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
-            --tenant ${{ secrets.AZURE_TENANT_ID }}
+      # - name: Login to Azure
+      #   run: |
+      #     az login --service-principal \
+      #       --username ${{ secrets.AZURE_CLIENT_ID }} \
+      #       --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+      #       --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Download Blob from Azure Storage
-        run: |
-          az storage blob download \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
-            --container-name ${{env.CONTAINER_NAME}} \
-            --name ${{env.STORAGE_FILE_NAME}} \
-            --file $(pwd)/${{env.STORAGE_FILE_NAME}} \
-            --auth-mode key \
-            --account-key ${{ secrets.AZURE_STORAGE_KEY }}
+      # - name: Download Blob from Azure Storage
+      #   run: |
+      #     az storage blob download \
+      #       --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+      #       --container-name ${{env.CONTAINER_NAME}} \
+      #       --name ${{env.STORAGE_FILE_NAME}} \
+      #       --file $(pwd)/${{env.STORAGE_FILE_NAME}} \
+      #       --auth-mode key \
+      #       --account-key ${{ secrets.AZURE_STORAGE_KEY }}
 
-      - name: Verify Download
-        run: ls -l $(pwd)
+      # - name: Verify Download
+      #   run: ls -l $(pwd)
 
-      - name: Install unzip
-        run: sudo apt install unzip -y
+      # - name: Install unzip
+      #   run: sudo apt install unzip -y
 
-      - name: Move file and unzip
-        run: |
-          if [ ! -f "$(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}" ]; then
-            mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}
-          else
-            echo "File already exists, skipping move step."
-          fi
-          unzip $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
+      # - name: Move file and unzip
+      #   run: |
+      #     if [ ! -f "$(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}" ]; then
+      #       mv $(pwd)/${{env.STORAGE_FILE_NAME}} $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}
+      #     else
+      #       echo "File already exists, skipping move step."
+      #     fi
+      #     unzip $(pwd)/${{env.PATH_TO_PACKAGE_FILE}}/${{env.STORAGE_FILE_NAME}}
 
-      - name: Compress files
-        run: |
-          zip -r deployment_files.zip ./*
+      # - name: Compress files
+      #   run: |
+      #     zip -r deployment_files.zip ./*
 
-      - name: SCP files
-        run: |
-          scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no deployment_files.zip abodoo@20.193.149.51:/home/abodoo/api/
+      # - name: SCP files
+      #   run: |
+      #     scp -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no deployment_files.zip abodoo@20.193.149.51:/home/abodoo/api/
 
-      - name: Decompress files on remote server
-        run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip -o deployment_files.zip'
+      # - name: Decompress files on remote server
+      #   run: |
+      #     ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip -o deployment_files.zip'
 
-      - name: Update system and install Python 3.10
-        run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            sudo apt update
-            sudo apt upgrade -y
-            sudo apt install -y software-properties-common
-            sudo add-apt-repository ppa:deadsnakes/ppa -y
-            sudo apt update
-            sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
-            sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-            sudo update-alternatives --config python3
-            python3 --version
-            pip3 --version
-          EOF
+      # - name: Update system and install Python 3.10
+      #   run: |
+      #     ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+      #       sudo apt update
+      #       sudo apt upgrade -y
+      #       sudo apt install -y software-properties-common
+      #       sudo add-apt-repository ppa:deadsnakes/ppa -y
+      #       sudo apt update
+      #       sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
+      #       sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+      #       sudo update-alternatives --config python3
+      #       python3 --version
+      #       pip3 --version
+      #     EOF
 
-      - name: Set up virtual environment and install dependencies
-        run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            cd /home/abodoo/api
-            rm -rf venv
-            python3.10 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install html5lib black
-          EOF
+      # - name: Set up virtual environment and install dependencies
+      #   run: |
+      #     ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+      #       cd /home/abodoo/api
+      #       rm -rf venv
+      #       python3.10 -m venv venv
+      #       source venv/bin/activate
+      #       pip install --upgrade pip
+      #       pip install -r requirements.txt
+      #       pip install html5lib black
+      #     EOF
 
       - name: Run the script
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             cd /home/abodoo/api
             source venv/bin/activate
-            python /home/abodoo/api/reedi/job_scrapping/scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
+            python /home/abodoo/api/reedi/job_scrapping/scrapping.py python scrapping.py --path_auth $(pwd) --path_endpoints $(pwd) --path_job $(pwd) --path_output $(pwd)/output --start_date 2024-06-01 --end_date 2024-07-01
           EOF
