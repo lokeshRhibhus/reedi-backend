@@ -180,7 +180,7 @@ jobs:
 
       - name: Install unzip on remote server
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             sudo apt-get update
             sudo apt-get install --reinstall python3-apt -y
             sudo apt-get install unzip -y
@@ -218,7 +218,6 @@ jobs:
             pyenv global 3.10.0
             pyenv --version
             python --version
-          
 
       - name: Install dependencies and run the script
         run: |
@@ -237,4 +236,5 @@ jobs:
             black .
             python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
           EOF
+
 
