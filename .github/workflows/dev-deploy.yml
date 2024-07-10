@@ -217,4 +217,4 @@ jobs:
           pip uninstall fsspec --yes
           pip install fsspec>=2024.2.0
           pip install pre-commit tqdm dvc
-          python scrapping.py --path_auth ./ --path_endpoints ./ --path
+          python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
