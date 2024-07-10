@@ -200,23 +200,13 @@ jobs:
             python3 --version
             pip3 --version
           EOF
-
-      - name: Install GLIBC 2.34
+          
+      - name: Update system and install required libraries
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             sudo apt update
-            sudo apt install -y libc6 libc6-dev
-            wget https://launchpad.net/ubuntu/+archive/primary/+files/glibc-source_2.34.orig.tar.xz
-            tar -xvf glibc-source_2.34.orig.tar.xz
-            cd glibc-2.34
-            mkdir build
-            cd build
-            ../configure
-            make
-            sudo make install
-            sudo ldconfig
-            cd ..
-            rm -rf glibc-2.34 glibc-source_2.34.orig.tar.xz
+            sudo apt upgrade -y
+            sudo apt install -y libc6 libc6-dev build-essential
           EOF
 
       - name: Install dependencies and run the script
