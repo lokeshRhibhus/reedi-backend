@@ -196,7 +196,7 @@ jobs:
 
       - name: Install pyenv and Python 3.10 on remote server
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             sudo apt update
             sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
             libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
@@ -206,6 +206,7 @@ jobs:
             fi
             export PYENV_ROOT="$HOME/.pyenv"
             export PATH="$PYENV_ROOT/bin:$PATH"
+            eval "$(pyenv init --path)"
             eval "$(pyenv init -)"
             eval "$(pyenv virtualenv-init -)"
             if ! pyenv versions | grep 3.10.0; then
@@ -230,5 +231,5 @@ jobs:
             pip install fsspec>=2024.2.0
             pip install black
             black .
-            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
+            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output --start_date 2024-06-01 --end_date 2024-07-01
           EOF
