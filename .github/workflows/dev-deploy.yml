@@ -201,19 +201,32 @@ jobs:
             pip3 --version
           EOF
 
+      - name: Install GLIBC 2.34
+        run: |
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+            sudo apt update
+            sudo apt install -y libc6 libc6-dev
+            wget https://launchpad.net/ubuntu/+archive/primary/+files/glibc-source_2.34.orig.tar.xz
+            tar -xvf glibc-source_2.34.orig.tar.xz
+            cd glibc-2.34
+            mkdir build
+            cd build
+            ../configure
+            make
+            sudo make install
+            sudo ldconfig
+            cd ..
+            rm -rf glibc-2.34 glibc-source_2.34.orig.tar.xz
+          EOF
+
       - name: Install dependencies and run the script
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            export PATH="/usr/bin:$PATH"
-            python3.10 -m venv /home/abodoo/api/venv
-            source /home/abodoo/api/venv/bin/activate
+            cd /home/abodoo/api
+            python3.10 -m venv venv
+            source venv/bin/activate
             pip install --upgrade pip
-            pip install -r /home/abodoo/api/reedi/job_scrapping/requirements.txt
-            pip install ojd_daps_skills@git+https://github.com/nestauk/ojd_daps_skills.git@6b94921f3173ed6686d574aad76567013cd24b89
-            pip uninstall fsspec --yes
-            pip install fsspec>=2024.2.0
-            pip install html5lib
-            pip install black
-            black .
-            python /home/abodoo/api/reedi/job_scrapping/scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output --start_date 2024-06-01 --end_date 2024-07-01
+            pip install -r requirements.txt
+            pip install html5lib black
+            python /home/abodoo/api/reedi/job_scrapping/scrapping.py --input_path ./data/inputs --output_path ./output --start_date 2024-06-01 --end_date 2024-07-01
           EOF
