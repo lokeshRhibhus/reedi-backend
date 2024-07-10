@@ -218,6 +218,7 @@ jobs:
             pyenv global 3.10.0
             pyenv --version
             python --version
+          EOF
 
       - name: Install dependencies and run the script
         run: |
