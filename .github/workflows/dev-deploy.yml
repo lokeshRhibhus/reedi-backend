@@ -187,36 +187,37 @@ jobs:
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 'cd /home/abodoo/api && unzip -o deployment_files.zip'
 
-      - name: Install Python 3.10 on remote server using deadsnakes PPA
-        run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            sudo apt update
-            sudo apt install -y software-properties-common
-            sudo add-apt-repository ppa:deadsnakes/ppa
-            sudo apt update
-            sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
-            sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-            sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
-            python3 --version
-            pip3 --version
-          EOF
-          
-      - name: Update system and install required libraries
+      - name: Update system and install Python 3.10
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             sudo apt update
             sudo apt upgrade -y
-            sudo apt install -y libc6 libc6-dev build-essential
+            sudo apt install -y software-properties-common
+            sudo add-apt-repository ppa:deadsnakes/ppa -y
+            sudo apt update
+            sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
+            sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+            sudo update-alternatives --config python3
+            python3 --version
+            pip3 --version
           EOF
 
-      - name: Install dependencies and run the script
+      - name: Set up virtual environment and install dependencies
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             cd /home/abodoo/api
+            rm -rf venv
             python3.10 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
             pip install html5lib black
+          EOF
+
+      - name: Run the script
+        run: |
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+            cd /home/abodoo/api
+            source venv/bin/activate
             python /home/abodoo/api/reedi/job_scrapping/scrapping.py --input_path ./data/inputs --output_path ./output --start_date 2024-06-01 --end_date 2024-07-01
           EOF
