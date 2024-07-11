@@ -287,6 +287,8 @@ jobs:
           EOF
         env:
           BUCKET_CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+          START_DATE: ${{ env.START_DATE }}
+          END_DATE: ${{ env.END_DATE }}
 
 
 
