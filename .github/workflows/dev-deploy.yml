@@ -230,12 +230,13 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates gnupg
             
-            # Add Google Cloud SDK key and repository
-            echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+            # Download and install Google Cloud SDK
+            curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-432.0.0-linux-x86_64.tar.gz
+            tar -xvf google-cloud-sdk-432.0.0-linux-x86_64.tar.gz
+            ./google-cloud-sdk/install.sh --quiet
             
-            # Update package list and install Google Cloud SDK
-            sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+            # Add Google Cloud SDK to PATH
+            export PATH=$PATH:$(pwd)/google-cloud-sdk/bin
             
             # Create and write to gcp-key.json
             touch gcp-key.json
@@ -261,5 +262,6 @@ jobs:
           EOF
         env:
           BUCKET_CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+
 
                   
