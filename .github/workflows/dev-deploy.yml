@@ -213,14 +213,32 @@ jobs:
             pip install -r requirements.txt
             pip install html5lib black
           EOF
+          
+      - name: Calculate dates for the previous month
+        id: calculate_dates
+        run: |
+          # Get the current date
+          CURRENT_DATE=$(date +'%Y-%m-%d')
 
+          # Get the first and last day of the previous month
+          START_DATE=$(date -d "$(date +'%Y-%m-01') -1 month" +'%Y-%m-%d')
+          END_DATE=$(date -d "$(date +'%Y-%m-01') -1 day" +'%Y-%m-%d')
+
+          # Print the dates to the output
+          echo "Start Date: $START_DATE"
+          echo "End Date: $END_DATE"
+
+          # Set the dates as environment variables
+          echo "START_DATE=$START_DATE" >> $GITHUB_ENV
+          echo "END_DATE=$END_DATE" >> $GITHUB_ENV
+          
       - name: Run the script
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             cd /home/abodoo/api
             source venv/bin/activate
             cd /home/abodoo/api/reedi/job_scrapping
-            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date 2024-06-01 --end_date 2024-07-01
+            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date $START_DATE --end_date $END_DATE
           EOF
           
       - name: Upload generated files to GCP bucket
@@ -254,7 +272,7 @@ jobs:
             ls -R /home/abodoo/api/reedi/job_scrapping/output/
             
             # Upload files to GCP bucket
-            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01/* gs://reedi-storage/dvcstore/data/raw/jobs/
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/$START_DATE_$END_DATE gs://reedi-storage/dvcstore/data/raw/jobs/
             
             # Clean up
             rm gcp-key.json
