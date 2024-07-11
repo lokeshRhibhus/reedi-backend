@@ -228,11 +228,12 @@ jobs:
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates gnupg
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+            curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+            echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
             sudo apt-get update && sudo apt-get install -y google-cloud-sdk
             echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > gcp-key.json
             gcloud auth activate-service-account --key-file=gcp-key.json
             gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
           EOF
+
 
