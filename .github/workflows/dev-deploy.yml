@@ -253,7 +253,7 @@ jobs:
         run: |
           START_DATE="${{ env.START_DATE }}"
           END_DATE="${{ env.END_DATE }}"
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
             # Install required packages
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
@@ -278,7 +278,7 @@ jobs:
             ls -R /home/abodoo/api/reedi/job_scrapping/output/
             
             # Upload files to GCP bucket
-            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE}/* gs://reedi-storage/dvcstore/data/raw/jobs/
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE} gs://reedi-storage/dvcstore/data/raw/jobs/
             
             # Verify the upload
             gsutil ls gs://reedi-storage/dvcstore/data/raw/jobs/
