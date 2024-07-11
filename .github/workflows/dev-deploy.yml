@@ -291,7 +291,7 @@ jobs:
             ls /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE}/
       
             # Upload files to GCP bucket
-            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE}/* gs://reedi-storage/dvcstore/data/raw/jobs/
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE} gs://reedi-storage/dvcstore/data/raw/jobs/
       
             # List contents in GCP bucket for verification
             gsutil ls gs://reedi-storage/dvcstore/data/raw/jobs/
