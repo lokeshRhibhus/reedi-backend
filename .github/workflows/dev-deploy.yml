@@ -251,43 +251,59 @@ jobs:
           
       - name: Upload generated files to GCP bucket
         run: |
-          START_DATE="${{ env.START_DATE }}"
-          END_DATE="${{ env.END_DATE }}"
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+          # Print START_DATE and END_DATE for debugging
+          echo "START_DATE=${{ env.START_DATE }}"
+          echo "END_DATE=${{ env.END_DATE }}"
+      
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
             # Install required packages
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+      
             # Download and install Google Cloud SDK
             curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-432.0.0-linux-x86_64.tar.gz
             tar -xvf google-cloud-sdk-432.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --quiet
+      
             # Add Google Cloud SDK to PATH for this session
             source ./google-cloud-sdk/path.bash.inc
+      
             # Create and write to gcp-key.json
-            echo '${{secrets.BUCKET_CREDENTIALS}}' > gcp-key.json
+            echo '${{ secrets.BUCKET_CREDENTIALS }}' > gcp-key.json
+      
             # Verify the content of the key file (redact sensitive information when sharing)
             cat gcp-key.json | sed 's/[a-zA-Z0-9]\{20\}/REDACTED/g'
-            
+      
             # Set GOOGLE_APPLICATION_CREDENTIALS environment variable
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/gcp-key.json"
-            
+      
             # Activate service account
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-            
+      
             # List the contents of the output directory
             ls -R /home/abodoo/api/reedi/job_scrapping/output/
-            
+      
+            # Print START_DATE and END_DATE for debugging
+            echo "START_DATE=${START_DATE}"
+            echo "END_DATE=${END_DATE}"
+      
+            # Check the specific date folder
+            ls /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE}/
+      
             # Upload files to GCP bucket
-            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE} gs://reedi-storage/dvcstore/data/raw/jobs/
-            
-            # Verify the upload
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/${START_DATE}_${END_DATE}/* gs://reedi-storage/dvcstore/data/raw/jobs/
+      
+            # List contents in GCP bucket for verification
             gsutil ls gs://reedi-storage/dvcstore/data/raw/jobs/
-            
+      
             # Clean up
             rm gcp-key.json
           EOF
         env:
-          BUCKET_CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
+          BUCKET_CREDENTIALS: ${{ secrets.BUCKET_CREDENTIALS }}
+          START_DATE: ${{ env.START_DATE }}
+          END_DATE: ${{ env.END_DATE }}
+
 
 
 
