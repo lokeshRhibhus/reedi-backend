@@ -226,12 +226,18 @@ jobs:
       - name: Upload generated files to GCP bucket
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+            # Remove any existing Google Cloud SDK sources
+            sudo rm -f /etc/apt/sources.list.d/google-cloud-sdk.list
+            sudo apt-get update
+      
+            # Install dependencies
+            sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
       
             # Add the Google Cloud public key
             curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
       
             # Add the Google Cloud SDK distribution URI as a package source
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
       
             # Update and install the Google Cloud SDK
             sudo apt-get update && sudo apt-get install -y google-cloud-sdk
@@ -240,10 +246,9 @@ jobs:
             echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > gcp-key.json
             
             # Activate service account
-            gcloud auth activate-service-account --key-file=gcp-key.json
+            /snap/bin/gcloud auth activate-service-account --key-file=gcp-key.json
       
             # Upload files to GCP bucket
-            gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
+            /snap/bin/gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
           EOF
-
-
+      
