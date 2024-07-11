@@ -254,7 +254,7 @@ jobs:
             ls -R /home/abodoo/api/reedi/job_scrapping/output/
             
             # Upload files to GCP bucket
-            gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01/* gs://reedi-storage/dvcstore/data/raw/jobs/
             
             # Clean up
             rm gcp-key.json
