@@ -226,13 +226,23 @@ jobs:
       - name: Upload generated files to GCP bucket
         run: |
           ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            sudo apt-get update
-            sudo apt-get install -y apt-transport-https ca-certificates gnupg
-            curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-            echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+      
+            # Add the Google Cloud public key
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+      
+            # Add the Google Cloud SDK distribution URI as a package source
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+      
+            # Update and install the Google Cloud SDK
             sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+      
+            # Set up Google Cloud credentials
             echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > gcp-key.json
+            
+            # Activate service account
             gcloud auth activate-service-account --key-file=gcp-key.json
+      
+            # Upload files to GCP bucket
             gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
           EOF
 
