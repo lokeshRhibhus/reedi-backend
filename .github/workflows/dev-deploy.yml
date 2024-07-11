@@ -235,18 +235,19 @@ jobs:
       - name: Run the script
         run: |
           echo "START_DATE=${START_DATE}"
-          echo "END_DATE=${END_DATE}"   
-
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+          echo "END_DATE=${END_DATE}"
+      
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
             cd /home/abodoo/api
             source venv/bin/activate
             cd /home/abodoo/api/reedi/job_scrapping
             echo "Running scrapping.py with START_DATE=${START_DATE} and END_DATE=${END_DATE}"
             python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output --start_date ${START_DATE} --end_date ${END_DATE}
-            EOF
-          env:
-            START_DATE: ${{ env.START_DATE }}
-            END_DATE: ${{ env.END_DATE }} 
+          EOF
+        env:
+          START_DATE: ${{ env.START_DATE }}
+          END_DATE: ${{ env.END_DATE }}
+ 
           
       - name: Upload generated files to GCP bucket
         run: |
