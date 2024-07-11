@@ -225,24 +225,32 @@ jobs:
           
       - name: Upload generated files to GCP bucket
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
-            curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-452.0.0-linux-x86_64.tar.gz
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
+            # Create and write to gcp-key.json
+            touch gcp-key.json
+            echo '${{secrets.BUCKET_CREDENTIALS}}' > gcp-key.json
             
-            tar -xf google-cloud-cli-452.0.0-linux-x86_64.tar.gz
+            # Verify the content of the key file (redact sensitive information when sharing)
+            cat gcp-key.json | sed 's/[a-zA-Z0-9]\{20\}/REDACTED/g'
             
-            ./google-cloud-sdk/install.sh --quiet
+            # Set GOOGLE_APPLICATION_CREDENTIALS environment variable
+            export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/gcp-key.json"
             
+            # Add Google Cloud SDK to PATH for this session
             export PATH=$PATH:$HOME/google-cloud-sdk/bin
             
-            gcloud version
+            # Activate service account
+            gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
             
-            echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > gcp-key.json
+            # List the contents of the output directory
+            ls -R /home/abodoo/api/reedi/job_scrapping/output/
             
-            gcloud auth activate-service-account --key-file=gcp-key.json
+            # Upload files to GCP bucket
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
             
-            gsutil cp /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
-            
-            rm google-cloud-cli-452.0.0-linux-x86_64.tar.gz
+            # Clean up
             rm gcp-key.json
           EOF
+        env:
+          BUCKET_CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
             
