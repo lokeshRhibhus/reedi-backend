@@ -238,7 +238,7 @@ jobs:
             cd /home/abodoo/api
             source venv/bin/activate
             cd /home/abodoo/api/reedi/job_scrapping
-            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output  --start_date $START_DATE --end_date $END_DATE
+            python scrapping.py --path_auth ./ --path_endpoints ./ --path_job ./ --path_output ./output --start_date $START_DATE --end_date $END_DATE
           EOF
           
       - name: Upload generated files to GCP bucket
