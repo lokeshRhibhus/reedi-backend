@@ -230,14 +230,19 @@ jobs:
             touch gcp-key.json
             echo '${{secrets.BUCKET_CREDENTIALS}}' > gcp-key.json
             
-            # Verify the content of the key file (redact sensitive information when sharing)
-            cat gcp-key.json | sed 's/[a-zA-Z0-9]\{20\}/REDACTED/g'
-            
             # Set GOOGLE_APPLICATION_CREDENTIALS environment variable
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/gcp-key.json"
             
+            # Reinstall Google Cloud SDK
+            curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-452.0.0-linux-x86_64.tar.gz
+            tar -xf google-cloud-cli-452.0.0-linux-x86_64.tar.gz
+            ./google-cloud-sdk/install.sh --quiet
+            
             # Add Google Cloud SDK to PATH for this session
             export PATH=$PATH:$HOME/google-cloud-sdk/bin
+            
+            # Verify Google Cloud SDK installation
+            gcloud version
             
             # Activate service account
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
@@ -246,11 +251,15 @@ jobs:
             ls -R /home/abodoo/api/reedi/job_scrapping/output/
             
             # Upload files to GCP bucket
-            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01 gs://reedi-storage/dvcstore/data/raw/jobs/
+            gsutil -m cp -r /home/abodoo/api/reedi/job_scrapping/output/2024-06-01_2024-07-01/* gs://reedi-storage/dvcstore/data/raw/jobs/
+            
+            # Verify the upload
+            gsutil ls gs://reedi-storage/dvcstore/data/raw/jobs/
             
             # Clean up
             rm gcp-key.json
+            rm google-cloud-cli-452.0.0-linux-x86_64.tar.gz
           EOF
         env:
           BUCKET_CREDENTIALS: ${{secrets.BUCKET_CREDENTIALS}}
-            
+                  
