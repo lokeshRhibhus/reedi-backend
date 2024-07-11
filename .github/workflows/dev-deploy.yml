@@ -251,7 +251,7 @@ jobs:
           
       - name: Upload generated files to GCP bucket
         run: |
-          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << 'EOF'
+          ssh -i vapi-vm2-reedi-backend -o StrictHostKeyChecking=no abodoo@20.193.149.51 << EOF
             # Install required packages
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
